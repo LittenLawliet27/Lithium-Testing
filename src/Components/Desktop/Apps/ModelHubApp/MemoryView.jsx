@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { deleteMemory, loadMemory, writeMemory } from '../../../../lib/ai/agent';
-import { backendHealth, backendMemorySync, backendUrl } from '../../../../lib/backendApi';
+import { BACKEND_FEATURES_DISABLED, BACKEND_INACTIVE_MESSAGE, backendHealth, backendMemorySync, backendUrl } from '../../../../lib/backendApi';
 import Icon from '../../../Icon';
 
 export default function MemoryView({ onCtxMenu }) {
@@ -18,7 +18,11 @@ export default function MemoryView({ onCtxMenu }) {
     const bump = () => setVersion(v => v + 1);
     window.addEventListener('lithium:memory-changed', bump);
     window.addEventListener('lithium:kv-ready', bump);
-    backendHealth().then(setBackend);
+    if (!BACKEND_FEATURES_DISABLED) {
+      backendHealth().then(setBackend);
+    } else {
+      setBackend({ ok: false, inactive: true, message: BACKEND_INACTIVE_MESSAGE, memories: 0 });
+    }
     return () => { window.removeEventListener('lithium:memory-changed', bump); window.removeEventListener('lithium:kv-ready', bump); };
   }, []);
 
@@ -43,12 +47,13 @@ export default function MemoryView({ onCtxMenu }) {
         <button className="shrink-0 rounded-lg bg-[#c3f5d9] px-3 py-1.5 text-xs font-medium text-[#102119]" onClick={() => setAdding(v => !v)}><Icon name="Plus" size={12} /> Add memory</button>
       </div>
       <div className="flex items-center gap-2 rounded-xl border border-white/[0.08] bg-[#10151b] px-4 py-3 text-[11px]">
-        <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: backend?.ok ? '#10b981' : '#6b7280' }} />
-        <span className="text-white/55">{backend?.ok ? <>Backend online — {backend.memories} memories</> : <>Backend offline (<span className="font-mono">{backendUrl()}</span>)</>}</span>
-        <button className="ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-md border border-white/10 px-2.5 py-1 text-[11px] text-white/70 hover:bg-white/10 disabled:opacity-40" disabled={!backend?.ok || syncing} onClick={syncBackend}>
+        <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: backend?.inactive ? '#f59e0b' : backend?.ok ? '#10b981' : '#6b7280' }} />
+        <span className="text-white/55">{backend?.inactive ? <>Backend inactive — design only</> : backend?.ok ? <>Backend online — {backend.memories} memories</> : <>Backend offline (<span className="font-mono">{backendUrl()}</span>)</>}</span>
+        <button className="ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-md border border-white/10 px-2.5 py-1 text-[11px] text-white/70 hover:bg-white/10 disabled:opacity-40" disabled={BACKEND_FEATURES_DISABLED || !backend?.ok || syncing} onClick={syncBackend}>
           {syncing ? <Icon name="Loader2" size={12} className="animate-spin" /> : <Icon name="Database" size={12} />} {syncing ? 'Syncing…' : 'Sync'}
         </button>
       </div>
+      {BACKEND_FEATURES_DISABLED && <p className="rounded-lg border border-amber-400/25 bg-amber-400/10 px-3 py-2 text-[11px] text-amber-200">{BACKEND_INACTIVE_MESSAGE}</p>}
       {syncMsg && <p className={`text-[11px] ${syncMsg.startsWith('✓') ? 'text-emerald-400/80' : 'text-red-400/80'}`}>{syncMsg}</p>}
       {adding && (
         <div className="space-y-2 rounded-xl border border-white/[0.08] bg-[#10151b] p-4">
