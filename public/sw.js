@@ -79,7 +79,11 @@ self.addEventListener('fetch', event => {
           if (response.ok) cache.put(event.request, response.clone());
           return response;
         } catch {
-          return (await cache.match(event.request)) || (await cache.match('/')) || Response.error();
+          return (
+            (await cache.match(event.request)) ||
+            (await cache.match(self.registration.scope)) ||
+            Response.error()
+          );
         }
       })()
     );

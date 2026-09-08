@@ -7,7 +7,16 @@ export default [
   { ignores: ['dist', 'node_modules', 'public', 'rust', 'src/wasm', 'lithium-proxy'] },
   js.configs.recommended,
   {
+    files: ['*.config.js'],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+      globals: { ...globals.node },
+    },
+  },
+  {
     files: ['**/*.{js,jsx}'],
+    ignores: ['*.config.js'],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',

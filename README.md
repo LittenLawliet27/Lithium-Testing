@@ -110,9 +110,18 @@ files are at the project root:
 - **Replit:** open the repository as a Repl;
   [`launcher/.replit`](launcher/.replit) starts Vite on the externally
   reachable host and port.
+- **GitHub Pages:** [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml)
+  builds and deploys `main` automatically via GitHub Actions. Enable it once
+  under repo **Settings → Pages → Source → GitHub Actions**; the app is then
+  served at `https://<owner>.github.io/<repo>/`. The workflow builds with
+  `BASE_PATH=/<repo>/` so assets and client-side routing resolve under that
+  sub-path, and copies `index.html` to `404.html` so deep links work without
+  server-side rewrites.
 
 For production deployments, run `npm run build` and serve the generated
-`dist/` directory with SPA fallback routing to `index.html`.
+`dist/` directory with SPA fallback routing to `index.html`. Set the
+`BASE_PATH` environment variable (e.g. `BASE_PATH=/repo-name/`) when the app
+is served from a sub-path instead of the domain root.
 
 ## CI
 

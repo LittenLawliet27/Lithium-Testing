@@ -27,6 +27,10 @@ function sourceFile404() {
 }
 
 export default defineConfig({
+  // Overridable so the same build works at the domain root (Vercel/Netlify)
+  // and under a sub-path (GitHub Pages project sites serve from
+  // /<repo-name>/). Set BASE_PATH in the environment to change it.
+  base: process.env.BASE_PATH || '/',
   plugins: [sourceFile404(), preact()],
   resolve: {
     alias: {
