@@ -10,10 +10,17 @@ import { storage } from './storage/localStorage';
 
 const DEFAULT_URL = 'http://127.0.0.1:8734';
 
+export const BACKEND_FEATURES_DISABLED = true;
+export const BACKEND_INACTIVE_MESSAGE = 'Backend inactive — Lithium is intentionally shown as a design prototype with no working backend features yet.';
+export const backendFeatureEnabled = () => !BACKEND_FEATURES_DISABLED;
+
 export const backendUrl = () => storage.get('backend-url', DEFAULT_URL);
 export const setBackendUrl = url => storage.set('backend-url', url);
 
 async function request(path, options = {}) {
+  if (!backendFeatureEnabled()) {
+    throw new Error(BACKEND_INACTIVE_MESSAGE);
+  }
   const response = await fetch(`${backendUrl()}${path}`, {
     headers: { 'Content-Type': 'application/json' },
     ...options,
@@ -31,6 +38,9 @@ async function request(path, options = {}) {
 
 /** Quick liveness probe — returns the health object or null when offline. */
 export async function backendHealth({ timeout = 2500 } = {}) {
+  if (!backendFeatureEnabled()) {
+    return { ok: false, inactive: true, message: BACKEND_INACTIVE_MESSAGE, memories: 0 };
+  }
   try {
     return await request('/api/health', { signal: AbortSignal.timeout(timeout) });
   } catch {

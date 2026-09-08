@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 
+import { BACKEND_FEATURES_DISABLED, BACKEND_INACTIVE_MESSAGE } from '../../../lib/backendApi';
 import { call, clearAudit, engineInfo, getAudit, getCatalog } from '../../../lib/ai/apiManager';
 import { loadDriveConfigs } from '../../../lib/cloudDrives';
 import { AI_PROVIDERS, loadKeys } from '../../../lib/ai/providers';
@@ -346,6 +347,7 @@ export default function ApiManagerApp({ windowed = false, closeSelf, minimizeSel
         { id: 'refresh', label: 'Refresh', icon: 'RefreshCw', action: () => setRefreshKey(k => k + 1) },
       ])}>
         <span className="mr-2 flex items-center gap-1.5 text-xs font-bold text-white/80"><Icon name="Plug2" size={14} className="acc-text" /> API Manager</span>
+        {BACKEND_FEATURES_DISABLED && <span className="rounded-full border border-amber-400/25 bg-amber-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-amber-200">Inactive</span>}
         {TABS.map(({ id, label, icon }) => (
           <button
             key={id}
@@ -363,6 +365,11 @@ export default function ApiManagerApp({ windowed = false, closeSelf, minimizeSel
         {windowed && <WinControls onClose={closeSelf} onMinimize={minimizeSelf} onMaximize={maximizeSelf} isMaximized={isMaximized} />}
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto p-4">
+        {BACKEND_FEATURES_DISABLED && (
+          <div className="mb-4 rounded-lg border border-amber-400/25 bg-amber-400/10 px-3 py-2 text-[11px] text-amber-200">
+            {BACKEND_INACTIVE_MESSAGE}
+          </div>
+        )}
         {tab === 'catalog' && <CatalogTab key={`catalog-${refreshKey}`} onCtxMenu={openMenu} />}
         {tab === 'widgets' && <WidgetsTab key={`widgets-${refreshKey}`} onCtxMenu={openMenu} />}
         {tab === 'external' && <ExternalTab key={`external-${refreshKey}`} />}
